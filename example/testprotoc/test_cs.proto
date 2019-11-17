@@ -1,0 +1,33 @@
+syntax = "proto3";
+package CSP;
+
+message CsFightReq {
+		uint32  fighterid_a = 1;
+		uint32  fighterid_b = 2;
+}
+
+message CsFightRsp {
+    int32   errcode   = 1;
+    uint32  winnerid  = 2;
+}
+
+message CsRankTop3Req
+{
+	int32 order = 1;
+}
+
+message CsRankTop3Rsp
+{
+	int32 	errcode		= 1;
+	uint32 	validnum	= 2;
+	repeated uint32 ids = 3;	
+}
+
+enum EnumCsCmd
+{
+	cs_cmd_begin	 = 0;
+	cs_cmd_fight_req = 1;
+	cs_cmd_fight_rsp = 2;
+	cs_cmd_query_rank_top3_req = 3;
+	cs_cmd_query_rank_top3_rsp = 4;
+}

@@ -1,0 +1,62 @@
+syntax = "proto3";
+package SSP;
+
+message SsQueryPowerReq
+{
+	uint32 	fighterid = 1;
+}
+
+message SsQueryPowerRsp
+{
+	int32  	errcode	= 1;
+	uint32 	power	= 2;
+}
+
+message SsDoFightReq
+{
+	uint32 	fighterid_a	= 1;
+	uint32 	power_a		= 2;
+	uint32 	fighterid_b	= 3;
+	uint32 	power_b		= 4;
+}
+
+message SsDoFightRsp
+{
+	int32 	errcode  = 1;
+	uint32	winnerid = 2;
+}
+
+message SsReportRankReq
+{
+	uint32 fighterid = 1;
+}
+
+message SsReportRankRsp
+{
+	int32 errcode = 1;
+}
+
+message SsDoRankTop3Req
+{
+	int32 order = 1;
+}
+
+message SsDoRankTop3Rsp
+{
+	int32 errcode		= 1;
+	uint32 validnum		= 2;
+	repeated uint32 ids = 3;
+}
+
+enum EnumSsCmd
+{
+	ss_cmd_begin = 0;
+	ss_cmd_query_power_req = 100;
+	ss_cmd_query_power_rsp = 101;
+	ss_cmd_fight_req = 102;
+	ss_cmd_fight_rsp = 103;
+	ss_cmd_reportrank_req = 104;
+	ss_cmd_reportrank_rsp = 105;
+	ss_cmd_query_rank_top3_req = 106;
+	ss_cmd_query_rank_top3_rsp = 107;
+}
