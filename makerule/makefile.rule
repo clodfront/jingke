@@ -1,0 +1,130 @@
+###############################################################################
+# @file:   Makefile.rule
+# @brief:  makefile 编译规则定义
+# @author: goof
+###############################################################################
+
+
+
+# 因为LOG4CPLUS是个日志库，可能大部分模块都需要，所以默认放入依赖内
+###############################################################################
+INC_ALL += ${INC_LOG4CPLUS} 
+# 注意: 依赖库的的顺序是: 先出现的依赖后出现的，大部分都依赖它，所以放到最后面去较为稳妥
+LIB_ALL += ${LIB_LOG4CPLUS} 
+###############################################################################
+
+#############makefile内置的几个变量说明########################################################
+#CXX = g++
+#LINK.cc = $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)
+#COMPILE.cc = $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+#AR = ar
+#ARFLAGS = rv
+###############################################################################################
+
+.PHONY: clean
+
+
+# 源文件 .c .cc .cpp
+C_FLIE   = $(wildcard *.c )
+CC_FLIE  = $(wildcard *.cc )
+CPP_FILE = $(wildcard *.cpp )
+SRC_FILE = $(C_FLIE) $(CC_FLIE) $(CPP_FILE)
+
+# 目标文件 .c.o .cc.o .cpp.o
+O_C_FILE   = $(patsubst %.c, %.c.o, $(C_FLIE))
+O_CC_FILE   = $(patsubst %.cc, %.cc.o, $(CC_FLIE))
+O_CPP_FILE = $(patsubst %.cpp, %.cpp.o, $(CPP_FILE))
+O_FILE  = $(O_C_FILE) $(O_CC_FILE) $(O_CPP_FILE)
+
+# 依赖关系文件 .c.d .cc.d .cpp.d
+D_C_FILE = $(patsubst %.c.o, %.c.d, $(O_C_FILE))
+D_CC_FILE = $(patsubst %.cc.o, %.cc.d, $(O_CC_FILE))
+D_CPP_FILE = $(patsubst %.cpp.o, %.cpp.d, $(O_CPP_FILE))
+D_FILE = $(D_C_FILE) $(D_CC_FILE) $(D_CPP_FILE)
+
+
+###############################################################################
+## 编译选项
+CXX += -std=c++11
+#调试信息,另外debug版本不需要优化，相当于代码里面定义了DEBUG宏，方便调试
+ifeq ($(debug),1)
+	CPPFLAGS += -DDEBUG
+else
+	CPPFLAGS += -O3
+endif
+CPPFLAGS += -Werror -Wall -ggdb -pipe -D_GNU_SOURCE -fno-strict-aliasing
+
+#根据现有依赖规则，如果链接a的话需要b.lib，而生成b.lib的b.cpp被修改的话，是检测不到变动的,只有可能检测到b.h的变动
+
+#如果使用预定头文件,请定义PREH_FILE
+#对应生成的GCH文件还只能放在当前目录下比较简单，放入其他目录很难保证其正常运行，打包源文件的脚本必须删除gch文件.
+ifneq ($(PREH_FILE),)
+PREH_GCH = $(PREH_FILE).gch
+CPPFLAGS += -Winvalid-pch
+endif
+
+#如果要编译EXECUTE文件
+ifneq ($(EXEFILE), )
+OUTFILE = $(EXEFILE)
+$(EXEFILE): $(O_FILE)
+	$(LINK.cc) -o $(EXEFILE) $(O_FILE)  $(LIB_ALL)
+endif
+
+#如果要编译DLL(.so)动态库
+ifneq ($(DLLFILE), )
+OUTFILE = $(DLLFILE)
+CPPFLAGS += -shared -fPIC
+$(DLLFILE): $(O_FILE)
+	$(LINK.cc) -o $(DLLFILE) $(O_FILE)  $(LIB_ALL)
+endif
+
+#如果要编译LIB(.a)静态库
+ifneq ($(LIBFILE), )
+OUTFILE = $(LIBFILE)
+$(LIBFILE): $(O_FILE)
+	$(AR) $(ARFLAGS) $(LIBFILE) $(O_FILE)
+endif
+
+
+#如果你使用预定头文件,我帮你编译gch文件.
+#实测发现为gch生成.d文件P用没有，所以这里不会为其生成.d文件
+ifneq ($(PREH_GCH),)
+$(O_FILE) : $(PREH_GCH)
+
+$(PREH_GCH) : $(PREH_FILE)
+	@rm -f $@; \
+	$(COMPILE.cc) -x c++-header $< -o $@ $(INC_ALL)
+endif
+
+#只有在编译的时候才包含依赖文件.d尝试构建.d
+ifeq ($(MAKECMDGOALS),)    
+-include $(D_FILE)   
+endif  
+
+#在Makefile中执行shell命令，传说是一行创建一个进程来执行（这个有待考证），所以为了保证-j选项多进程编译时的安全最好将多组shell执行写在一行内
+#另外@符号只能放在行首，貌似也很符合上句话？
+%.c.d : %.c
+	@$(CXX) -MM $< -o $@ $(INC_ALL);	\
+	sed -i "s;$(patsubst %.c.d,%.o,$@):;$(patsubst %.c.d,%.c.o,$@):;g" $@
+
+%.cc.d : %.cc
+	@$(CXX) -MM $< -o $@ $(INC_ALL);	\
+	sed -i "s;$(patsubst %.cc.d,%.o,$@):;$(patsubst %.cc.d,%.cc.o,$@):;g" $@
+
+%.cpp.d : %.cpp
+	@$(CXX) -MM $< -o $@ $(INC_ALL);	\
+	sed -i "s;$(patsubst %.cpp.d,%.o,$@):;$(patsubst %.cpp.d,%.cpp.o,$@):;g" $@
+
+%.c.o : %.c %.c.d
+	$(COMPILE.cc) $< -o $@ $(INC_ALL)
+
+%.cc.o : %.cc %.cc.d
+	$(COMPILE.cc) $< -o $@ $(INC_ALL)
+
+%.cpp.o : %.cpp %.cpp.d
+	$(COMPILE.cc) $< -o $@ $(INC_ALL)
+
+
+clean:
+	rm -vf $(OUTFILE) $(O_FILE) $(D_FILE) $(PREH_GCH)
+

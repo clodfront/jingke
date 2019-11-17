@@ -1,0 +1,43 @@
+###############################################################################
+# @file:   Makefile.depend
+# @brief:  编译依赖
+# @author: goof
+#################################################################################
+
+# 设置工程目录
+PRJ_ROOT = DIR_OF_ROOT_WILL_REPLACE_BY_SCRIPT
+
+
+# 依赖路径
+PRJ_EXT = ${PRJ_ROOT}/ext
+
+INC_LOG4CPLUS = -I${PRJ_EXT}/log4cplus/include
+LIB_LOG4CPLUS = -L${PRJ_EXT}/log4cplus/lib -llog4cplus -lrt
+
+INC_LIBCURL = -I${PRJ_EXT}/curl/include -DCURL_STATICLIB
+LIB_LIBCURL = -L${PRJ_EXT}/curl/lib -lcurl -L${PRJ_EXT}/curl/openssl/lib -lssl -lcrypto -ldl -lpthread
+
+INC_JSON = -I${PRJ_EXT}/Json-master/src
+
+INC_PB	= -I${PRJ_EXT}/protobuf/include
+LIB_PB	= -L${PRJ_EXT}/protobuf/lib -lprotobuf
+
+INC_UTILITY = -I${PRJ_ROOT}/utility
+LIB_UTILITY	= -L${PRJ_ROOT}/utility -lutility
+
+INC_ASYNC_WORK = -I${PRJ_ROOT}/async_work
+LIB_ASYNC_WORK = -L${PRJ_ROOT}/async_work -lasync_work
+
+INC_NET = -I${PRJ_ROOT}/net
+LIB_NET = -L${PRJ_ROOT}/net -lnet
+
+INC_SERVER = -I${PRJ_ROOT}/server
+LIB_SERVER = -L${PRJ_ROOT}/server -lserver
+
+
+
+
+
+
+
+
