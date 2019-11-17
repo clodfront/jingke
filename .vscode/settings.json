@@ -1,0 +1,5 @@
+{
+    "editor.minimap.enabled": false,
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "C_Cpp.errorSquiggles": "Disabled"
+}
