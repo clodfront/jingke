@@ -1,0 +1,1 @@
+killall dbserverlike fightserverlike logicserverlike rankserverlike clientlike
