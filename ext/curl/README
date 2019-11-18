@@ -1,0 +1,10 @@
+openssl:
+
+./config -fPIC no-shared --prefix=youropenssldir no-dso no-ssl3
+
+libcurl:
+
+./configure --prefix=curl --disable-shared --enable-static --with-ssl=youropenssldir --without-libidn --without-librtmp --without-gnutls --without-nss --without-libssh2 --without-zlib --without-winidn --disable-rtsp --disable-ldap --disable-ldaps --disable-ipv6 --disable-threaded-resolver --disable-pthreads
+
+
+
