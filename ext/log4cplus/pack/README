@@ -1,0 +1,3 @@
+./configure --prefix=/usr/local/lib/log4cplus --enable-static=yes --enable-shared=no --enable-threads=no CXXFLAGS=-fPIC
+
+modify loggingmacros.h `s macro LOG4CPLUS_MACRO_FUNCTION imp order
